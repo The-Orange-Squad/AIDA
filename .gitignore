@@ -1,3 +1,4 @@
 /VirtualEnv
 .env
 /__pycache__
+banned_users.json
