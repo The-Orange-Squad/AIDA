@@ -250,6 +250,63 @@ async def feedback(ctx):
     modal = FeedbackModal(title="Send Feedback")
     await ctx.send_modal(modal)
 
+class exportButton(discord.ui.Button):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.style = discord.ButtonStyle.green
+        self.label = "Export Conversation"  
+        self.emoji = discord.PartialEmoji(name="📥") 
+    async def callback(self, interaction):
+        # Export the conversation
+        user_id = interaction.user.id
+        # Using the same method as with the modal
+        try:
+            message_history = user_conversations[user_id]
+        except:
+            message_history = None
+        # Put this into a .txt file, if a message history exists
+        if message_history:
+            with open(f"message_history_{user_id}.txt", "w") as f:
+                for message in message_history:
+                    f.write(message["user_name"] + ": " + message["message"] + "\n==================\n")
+        
+            # Send the feedback to the developer
+            file = discord.File(f"message_history_{user_id}.txt")
+            await interaction.response.send_message("Here is your conversation!", file=file)
+            os.remove(f"message_history_{user_id}.txt")
+        else:
+            embed = discord.Embed(
+                title="No conversation to export!",
+                description="You don't have an active conversation with AIDA to export.",
+                color=discord.Color.yellow()
+            )
+            await interaction.response.send_message(embed=embed)
+
+class exportConvView(discord.ui.View):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add a button to export the conversation
+        self.add_item(exportButton())
+
+
+@bot.slash_command(name="conversation", description="Check your active conversation with AIDA.")
+async def conversation(ctx):
+    if ctx.author.id not in user_conversations:
+        embed = discord.Embed(
+            title="Error",
+            description="You don't have an active conversation with AIDA.",
+            color = discord.Color.red()
+        )
+        await ctx.respond(embed=embed)
+        return
+    embed=discord.Embed(
+        title="Your active conversation with AIDA:",
+        color=discord.Color.green(),
+        description="\n\n"
+    )
+    for message in user_conversations[ctx.user.id]:
+        embed.description += message["user_name"] + ": " + message["message"] + "\n"
     
+    await ctx.respond(embed=embed, view=exportConvView())
 
 bot.run(DISCORD_TOKEN)
