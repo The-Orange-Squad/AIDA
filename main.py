@@ -305,7 +305,11 @@ async def conversation(ctx):
         description="\n\n"
     )
     for message in user_conversations[ctx.user.id]:
-        embed.description += message["user_name"] + ": " + message["message"] + "\n"
+        embed.description += "**" + message["user_name"] + "**: " + message["message"] + "\n"
+    
+    if ctx.author.id not in user_personalities:
+        user_personalities[ctx.author.id] = "Default"
+    embed.set_footer(text="Total messages: " + str(len(user_conversations[ctx.user.id]))  + " | Tone: " + user_personalities[ctx.user.id], icon_url=ctx.author.avatar)
     
     await ctx.respond(embed=embed, view=exportConvView())
 
