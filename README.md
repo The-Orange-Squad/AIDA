@@ -1,3 +1,4 @@
+
 # AIDA Discord Bot
 
 ## Table of Contents
@@ -12,6 +13,7 @@
   - [Changing AIDA's Personality](#changing-aidas-personality)
   - [Banning and Unbanning Users](#banning-and-unbanning-users)
   - [Sending Feedback](#sending-feedback)
+  - [Web Search Settings](#web-search-settings)  <!-- Added this section -->
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -100,6 +102,16 @@ Users can provide feedback to the bot developer using the `/feedback` command:
 2. A modal dialog will appear, allowing you to enter your feedback.
 
 3. After submitting feedback, it will be sent to the developer for review.
+
+### Web Search Settings
+
+Users can toggle web search settings using the `/settings` command:
+
+1. Type `/settings` in a text channel.
+
+2. Choose the option to enable or disable web search results from AIDA.
+
+3. A confirmation message will be provided, and your web search settings will be updated accordingly.
 
 ## Contributing
 
