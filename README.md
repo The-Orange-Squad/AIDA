@@ -25,7 +25,7 @@ AIDA (Artificial Intelligence Discord Assistant) is a Discord bot designed to pr
 
 ### Prerequisites
 
-Before setting up the AIDA Discord Bot, ensure you have the following:
+Before setting up the AIDA Discord Bot (self-hosted), ensure you have the following:
 
 1. A Discord Bot Token: Create a Discord Bot and obtain its token. You can do this by creating a new bot on the [Discord Developer Portal](https://discord.com/developers/applications).
 
