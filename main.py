@@ -312,5 +312,22 @@ async def conversation(ctx):
     embed.set_footer(text="Total messages: " + str(len(user_conversations[ctx.user.id]))  + " | Tone: " + user_personalities[ctx.user.id], icon_url=ctx.author.avatar)
     
     await ctx.respond(embed=embed, view=exportConvView())
+    
+
+@bot.slash_command(name="help", description="Get help with using AIDA")
+async def help(ctx):
+    embed = discord.Embed(
+        title="Help",
+        description="Here are the commands you can use with AIDA:",
+        color=discord.Color.green()
+    )
+    embed.set_thumbnail(url=bot.user.avatar)
+    # Add the commands. Split with categories with pages
+    embed.add_field(name="Conversation", value="`/conversation` - Check your active conversation with AIDA.\n`/clear` - Clear your conversation with AIDA.\n`/persona` - Change the personality of AIDA.", inline=False)
+    embed.add_field(name="Feedback", value="`/feedback` - Send feedback to help us improve AIDA.", inline=False)
+    embed.add_field(name="Moderation", value="`/ban` - Ban a user from using AIDA.\n`/unban` - Unban a user from using AIDA.", inline=False)
+    await ctx.respond(embed=embed)
+
+
 
 bot.run(DISCORD_TOKEN)
