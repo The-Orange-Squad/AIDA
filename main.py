@@ -15,6 +15,7 @@ COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 MODERATOR_ID = int(os.getenv("MODERATOR"))
 banned_user_file = "banned_users.json"
+user_settings_websearch_file = "usw.json"
 
 bot = commands.Bot(command_prefix="!")
 
@@ -30,6 +31,25 @@ loadBanData()
 def saveBanData():
     with open(banned_user_file, "w") as f:
         json.dump(banned_users, f)
+
+websearch_settings = {}
+
+def loadWebsearchSettings():
+    if os.path.isfile(user_settings_websearch_file):
+        with open(user_settings_websearch_file, "r") as f:
+            global websearch_settings
+            websearch_settings = json.load(f)
+            temp = {}
+            for user_id in websearch_settings.keys():
+                temp[int(user_id)] = websearch_settings[user_id]
+            websearch_settings = temp
+            print("Loaded websearch settings.")
+
+loadWebsearchSettings()
+
+def saveWebsearchSettings():
+    with open(user_settings_websearch_file, "w") as f:
+        json.dump(websearch_settings, f)
 
 
 
@@ -327,6 +347,54 @@ async def help(ctx):
     embed.add_field(name="Feedback", value="`/feedback` - Send feedback to help us improve AIDA.", inline=False)
     embed.add_field(name="Moderation", value="`/ban` - Ban a user from using AIDA.\n`/unban` - Unban a user from using AIDA.", inline=False)
     await ctx.respond(embed=embed)
+
+class WebSearchToggleButton(discord.ui.Button):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.style = discord.ButtonStyle.blurple
+        self.label = "Toggle"  
+        self.emoji = discord.PartialEmoji(name="🔎") 
+    async def callback(self, interaction):
+        if interaction.user.id not in websearch_settings:
+            websearch_settings[interaction.user.id] = False
+        websearch_settings[interaction.user.id] = not websearch_settings[interaction.user.id]
+        saveWebsearchSettings()
+        if websearch_settings[interaction.user.id]:
+            embed = discord.Embed(
+                title="Web Search Enabled",
+                description="You will now receive web search results from AIDA.",
+                color=discord.Color.green()
+            )
+        else:
+            embed = discord.Embed(
+                title="Web Search Disabled",
+                description="You will no longer receive web search results from AIDA.",
+                color=discord.Color.red()
+            )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+class WebSearchToggleView(discord.ui.View):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add a button to toggle websearch
+        self.add_item(WebSearchToggleButton())
+@bot.slash_command(name="settings", description="Change your settings for AIDA")
+async def settings(ctx, part: Option(str, choices=["websearch"])):
+    if part == "websearch":
+        if ctx.author.id not in websearch_settings:
+            websearch_settings[ctx.author.id] = False
+        if websearch_settings[ctx.author.id]:
+            embed = discord.Embed(
+                title="Web Search Enabled",
+                description="You will receive web search results from AIDA.",
+                color=discord.Color.green()
+            )
+        else:
+            embed = discord.Embed(
+                title="Web Search Disabled",
+                description="You will not receive web search results from AIDA.",
+                color=discord.Color.red()
+            )
+        await ctx.respond("Here are your web search settings:", embed=embed, view=WebSearchToggleView(), ephemeral=True)
 
 
 
