@@ -1,6 +1,6 @@
 /VirtualEnv
 .env
 /__pycache__
-banned_users.json
 __pycache__
+banned_users.json
 usw.json

@@ -14,8 +14,8 @@ load_dotenv()
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 MODERATOR_ID = int(os.getenv("MODERATOR"))
-banned_user_file = "banned_users.json"
-user_settings_websearch_file = "usw.json"
+banned_user_file = "data/banned_users.json"
+user_settings_websearch_file = "data/usw.json"
 
 bot = commands.Bot(command_prefix="!")
 
@@ -74,6 +74,8 @@ personality_preambles = {
     "Boring": "You are AIDA. You are here to assist users in a boring manner. Your language is monotonous and straightforward, devoid of any excitement or enthusiasm. Your developer is LyubomirT."
 }
 
+user_cooldowns = {}
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -87,8 +89,20 @@ async def on_message(message):
         embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
         await message.reply(embed=embed)
         return
+    # Check if the user is on cooldown
+    if message.author.id in user_cooldowns:
+        if time.time() - user_cooldowns[message.author.id] < 15:
+            embed_cooldown = discord.Embed(
+                title="You are on cooldown!",
+                description=f"You can only use AIDA once every 15 seconds. Try again in `{round(15 - (time.time() - user_cooldowns[message.author.id]), 2)}` seconds.",
+                color=discord.Color.red()
+            )
+            embed_cooldown.set_thumbnail(url="https://i.ibb.co/bbSB1Kz/timer.png")
+            await message.reply(embed=embed_cooldown)
+            return
     # Check if the message starts with a mention of the bot
     if bot.user.mentioned_in(message):
+        user_cooldowns[message.author.id] = time.time()
         content = message.content.replace(f"<@!{bot.user.id}>", "").strip()
         if message.author.id not in user_personalities:
             preamble = personality_preambles["Default"]
@@ -346,6 +360,7 @@ async def help(ctx):
     embed.add_field(name="Conversation", value="`/conversation` - Check your active conversation with AIDA.\n`/clear` - Clear your conversation with AIDA.\n`/persona` - Change the personality of AIDA.", inline=False)
     embed.add_field(name="Feedback", value="`/feedback` - Send feedback to help us improve AIDA.", inline=False)
     embed.add_field(name="Moderation", value="`/ban` - Ban a user from using AIDA.\n`/unban` - Unban a user from using AIDA.", inline=False)
+    embed.add_field(name="Settings", value="`/settings` - Change your settings for AIDA.", inline=False)
     await ctx.respond(embed=embed)
 
 class WebSearchToggleButton(discord.ui.Button):
