@@ -1,5 +1,14 @@
 
-# AIDA Discord Bot
+<center><h1>AIDA Discord Bot</h1></center>
+
+<center>
+<div style="display: flex; flex-direction: row; margin: 0 auto; allign-items: center; justify-content: center; margin-bottom: 30px;">
+<img src="https://img.shields.io/github/license/The-Orange-Squad/AIDA?style=flat-square">
+<img src="https://img.shields.io/github/issues/The-Orange-Squad/AIDA?style=flat-square">
+</div>
+</center>
+
+<center><img src="https://images-ext-2.discordapp.net/external/oslmTbRYhIJI_-aeit3iQ1jA22I8xeHrilEgjpYcVKA/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1155512630627270727/ca5fe805c44b823f1fe308fa6ed9dc97.png?width=658&height=658" style="width:300px; border-radius: 10px;"></center>
 
 ## Table of Contents
 
@@ -20,7 +29,7 @@
 
 ## Introduction
 
-AIDA (Artificial Intelligence Discord Assistant) is a Discord bot designed to provide conversational interactions with users. It uses the Cohere API for natural language processing and can be configured with different personalities to suit the tone of interactions.
+AIDA (Artificial Intelligence Discord Assistant) is a Discord bot designed to provide conversational interactions with users. It uses the <u>Cohere</u> API for natural language processing and can be configured with different personalities to suit the tone of interactions.
 
 ## Setup
 
