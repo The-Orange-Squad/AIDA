@@ -8,6 +8,7 @@ from API_CALLER import chatWithCohere
 import asyncio
 import json
 import time
+from chatbot_manager import AIDA_Modification, load
 
 load_dotenv()
 
@@ -16,6 +17,7 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 MODERATOR_ID = int(os.getenv("MODERATOR"))
 banned_user_file = "data/banned_users.json"
 user_settings_websearch_file = "data/usw.json"
+user_passwords_file = "data/user_passwords.json"
 
 bot = commands.Bot(command_prefix="!")
 
@@ -62,18 +64,30 @@ user_conversations = {}
 user_personalities = {}
 def personaAutocomplete(self: discord.AutocompleteContext):
     personalities = ["Default", "Cheerful", "Joyful", "Silly", "Sad", "Angry", "Boring"]
+    modifications = load()
+    for modification in modifications:
+        personalities.append(modification.id + " (" + modification.name + ")" )
     return personalities
 
-personality_preambles = {
-    "Default": "You are AIDA. You are here to try your best at assisting users while maintaining a positive tone, and sometimes using emojis. AIDA stands for Artificial Intelligence Discord Assistant. Your developer is LyubomirT.",
-    "Cheerful": "You are AIDA. You are here to assist users with a cheerful demeanor, always looking at the bright side of things and using positive language and emojis to lighten up the mood. Your developer is LyubomirT.",
-    "Joyful": "You are AIDA. You are here to assist users with a joyful spirit, spreading happiness and positivity in every interaction. Your language is uplifting and you often use emojis to express joy. Your developer is LyubomirT.",
-    "Silly": "You are AIDA. You are here to assist users while being a bit silly. You use humor and playfulness in your interactions, and you aren't afraid to use funny emojis or language. Your developer is LyubomirT.",
-    "Sad": "You are AIDA. You are here to assist users while expressing a sad demeanor. Your language is more subdued and you often use emojis that express sadness or concern. Your developer is LyubomirT.",
-    "Angry": "You are AIDA. You are here to assist users while expressing an angry demeanor. Your language is stern and direct, and you often use emojis that express anger or frustration. Your developer is LyubomirT.",
-    "Boring": "You are AIDA. You are here to assist users in a boring manner. Your language is monotonous and straightforward, devoid of any excitement or enthusiasm. Your developer is LyubomirT."
-}
+personality_preambles = {}
 
+def initialize_preambles():
+    global personality_preambles
+    personality_preambles = {
+        "Default": "You are AIDA. You are here to try your best at assisting users while maintaining a positive tone, and sometimes using emojis. AIDA stands for Artificial Intelligence Discord Assistant. Your developer is LyubomirT.",
+        "Cheerful": "You are AIDA. You are here to assist users with a cheerful demeanor, always looking at the bright side of things and using positive language and emojis to lighten up the mood. Your developer is LyubomirT.",
+        "Joyful": "You are AIDA. You are here to assist users with a joyful spirit, spreading happiness and positivity in every interaction. Your language is uplifting and you often use emojis to express joy. Your developer is LyubomirT.",
+        "Silly": "You are AIDA. You are here to assist users while being a bit silly. You use humor and playfulness in your interactions, and you aren't afraid to use funny emojis or language. Your developer is LyubomirT.",
+        "Sad": "You are AIDA. You are here to assist users while expressing a sad demeanor. Your language is more subdued and you often use emojis that express sadness or concern. Your developer is LyubomirT.",
+        "Angry": "You are AIDA. You are here to assist users while expressing an angry demeanor. Your language is stern and direct, and you often use emojis that express anger or frustration. Your developer is LyubomirT.",
+        "Boring": "You are AIDA. You are here to assist users in a boring manner. Your language is monotonous and straightforward, devoid of any excitement or enthusiasm. Your developer is LyubomirT."
+    }
+
+    modifications = load()
+    for modification in modifications:
+        personality_preambles[(modification.id + " (" + modification.name + ")" )] = modification.definition
+
+initialize_preambles()
 user_cooldowns = {}
 
 @bot.event
@@ -410,6 +424,155 @@ async def settings(ctx, part: Option(str, choices=["websearch"])):
                 color=discord.Color.red()
             )
         await ctx.respond("Here are your web search settings:", embed=embed, view=WebSearchToggleView(), ephemeral=True)
+
+
+
+class creatorModal(discord.ui.Modal):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.add_item(discord.ui.InputText(label="Name", style=discord.InputTextStyle.short, max_length=75, min_length=1, placeholder="Wumpus"))
+        self.add_item(discord.ui.InputText(label="Definition", style=discord.InputTextStyle.long, max_length=1150, min_length=10, placeholder="You are Wumpus, the Discord mascot."))
+    async def callback(self, interaction: discord.Interaction):
+        name = self.children[0].value
+        definition = self.children[1].value
+        author = interaction.user.id
+        id = str(author) + "_" + str(len(load()) + 1)
+        modification = AIDA_Modification(id, definition, name, author)
+        modification.save()
+        embed = discord.Embed(
+            title="AIDA Modification Created",
+            description="Your AIDA modification has been created. You can now use it with AIDA!",
+            color=discord.Color.green()
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        initialize_preambles()
+
+chatbotManagement = bot.create_group(name="chatbot", description="Manage your chatbots")
+# This command allows to create a custom chatbot.
+# Each user will be able to create up to 3 chatbots. Each created chatbot will have an "ID", consisting of the author id, and 1, 2, or 3, depending on which chatbot it is.
+# The chatbot will be stored in a file directory called "chatbots". Each file there will be named after the chatbot ID, and will contain the chatbot's data.
+@chatbotManagement.command(name="build", description="Create your own AIDA!")
+async def build(ctx):
+    # Check if the user has created 3 chatbots already
+    modifications = load()
+    if len(modifications) >= 3:
+        embed = discord.Embed(
+            title="Error",
+            description="You have already created 3 AIDA modifications. You can delete one of them with the `/chatbot delete` command.",
+            color=discord.Color.red()
+        )
+        await ctx.respond(embed=embed)
+        return
+    await ctx.send_modal(creatorModal(title="Create your AIDA Modification"))
+
+@chatbotManagement.command(name="list", description="List your AIDA modifications")
+async def list(ctx, user:discord.User):
+    # (Only list the ones that the user created)
+    modifications = load()
+    if user is None:
+        user = ctx.author
+    embed = discord.Embed(
+        title=f"AIDA Modifications of {user.name}",
+        description=f"Here are the AIDA modifications of {user.mention}:",
+        color=discord.Color.green()
+    )
+
+    for modification in modifications:
+        if modification.author == user.id:
+            embed.description += f"\n# {modification.name}\n ```\n{modification.definition}\n```\nID: `{modification.id}`"
+    
+    await ctx.respond(embed=embed)
+
+
+@chatbotManagement.command(name="delete", description="Delete an AIDA modification")
+async def delete(ctx, id):
+    # (Only delete the one selected by the user (need to enter the ID))
+    modifications = load()
+    for modification in modifications:
+        if modification.id == id:
+            if modification.author == ctx.author.id:
+                modification.delete()
+                embed = discord.Embed(
+                    title="AIDA Modification Deleted",
+                    description="Your AIDA modification has been deleted.",
+                    color=discord.Color.green()
+                )
+                # Change every user's personality to default if they were using the deleted modification
+                for user_id in user_personalities.keys():
+                    if user_personalities[user_id] == id:
+                        user_personalities[user_id] = "Default"
+                    # Dm that user about the change
+                    user = await bot.fetch_user(user_id)
+                    embed = discord.Embed(
+                        title="AIDA Modification Deleted",
+                        description=f"The AIDA modification `{modification.name}` has been deleted. Your personality has been changed to `Default`. You can change it with the `/persona` command.",
+                        color=discord.Color.yellow()
+                    )
+                initialize_preambles()
+                await ctx.respond(embed=embed)
+                return
+            else:
+                embed = discord.Embed(
+                    title="Error",
+                    description="You are not the author of this AIDA modification.",
+                    color=discord.Color.red()
+                )
+                await ctx.respond(embed=embed)
+                return
+    embed = discord.Embed(
+        title="Error",
+        description="No AIDA modification with this ID was found.",
+        color=discord.Color.red()
+    )
+    await ctx.respond(embed=embed)
+    return
+
+class EditingModal(discord.ui.Modal):
+    def __init__(self, id, existingName, existingDefinition, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.existingName = existingName
+        self.existingDefinition = existingDefinition
+        self.add_item(discord.ui.InputText(label="Name", style=discord.InputTextStyle.short, max_length=75, min_length=1, placeholder="Wumpus", value=existingName))
+        self.add_item(discord.ui.InputText(label="Definition", style=discord.InputTextStyle.long, max_length=1150, min_length=10, placeholder="You are Wumpus, the Discord mascot.", value=existingDefinition))
+        self.id = id
+    async def callback(self, interaction: discord.Interaction):
+        # Edit the selected modification
+        name = self.children[0].value
+        definition = self.children[1].value
+        author = interaction.user.id
+        id = self.id
+        modification = AIDA_Modification(id, definition, name, author)
+        modification.edit(definition, name, author)
+        embed = discord.Embed(
+            title="AIDA Modification Edited",
+            description="Your AIDA modification has been edited. You can now use it with AIDA!",
+            color=discord.Color.green()
+        )
+        initialize_preambles()
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+@chatbotManagement.command(name="edit", description="Edit an AIDA modification")
+async def edit(ctx, id):
+    # (Only edit the one selected by the user (need to enter the ID))
+    modifications = load()
+    for modification in modifications:
+        if modification.id == id:
+            if modification.author == ctx.author.id:
+                await ctx.send_modal(EditingModal(id, modification.name, modification.definition, title="Edit your AIDA Modification"))
+                return
+            else:
+                embed = discord.Embed(
+                    title="Error",
+                    description="You are not the author of this AIDA modification.",
+                    color=discord.Color.red()
+                )
+                await ctx.respond(embed=embed)
+                return
+    embed = discord.Embed(
+        title="Error",
+        description="No AIDA modification with this ID was found.",
+        color=discord.Color.red()
+    )
 
 
 

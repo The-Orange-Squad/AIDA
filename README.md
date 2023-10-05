@@ -14,6 +14,7 @@
   - [Banning and Unbanning Users](#banning-and-unbanning-users)
   - [Sending Feedback](#sending-feedback)
   - [Web Search Settings](#web-search-settings)  <!-- Added this section -->
+  - [AIDA Modifications](#aida-modifications)  <!-- Added this section -->
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -112,6 +113,30 @@ Users can toggle web search settings using the `/settings` command:
 2. Choose the option to enable or disable web search results from AIDA.
 
 3. A confirmation message will be provided, and your web search settings will be updated accordingly.
+
+### AIDA Modifications
+
+With this new feature, you can give AIDA custom instructions to follow. Here's how:
+
+1. Type `/chatbot build` in a text channel.
+
+2. A modal dialog will appear, allowing you to enter your custom instructions.
+
+3. After submitting your instructions, a new "AIDA modification" will be created for your profile.
+
+4. You can view your AIDA modifications using the `/chatbot list` command.
+
+5. To delete an AIDA modification, use the `/chatbot delete` command.
+
+### Chatting with an AIDA Modification
+
+To chat with an AIDA modification, follow these steps:
+
+1. Type `/persona` in a text channel.
+
+2. Select the ID of the AIDA modification you want to chat with.
+
+3. AIDA will respond to your message based on the configured personality and the content of your message.
 
 ## Contributing
 

@@ -4,3 +4,5 @@
 __pycache__
 banned_users.json
 usw.json
+modifications/*
+!modifications/.gitkeep
