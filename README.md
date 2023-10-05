@@ -2,7 +2,7 @@
 <h1>AIDA Discord Bot</h1>
 </div>
 
-<div style=" margin: 0 auto; align-items: center; justify-content: center;  display: flex; flex-direction: column;">
+<div align="center" style=" margin: 0 auto; align-items: center; justify-content: center;  display: flex; flex-direction: column;">
   <div style="display: flex; flex-direction: row; margin-bottom: 30px;">
     <img src="https://img.shields.io/github/license/The-Orange-Squad/AIDA?style=flat-square" style="margin-right: 10px;">
     <img src="https://img.shields.io/github/issues/The-Orange-Squad/AIDA?style=flat-square">
