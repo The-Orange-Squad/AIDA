@@ -375,6 +375,7 @@ async def help(ctx):
     embed.add_field(name="Feedback", value="`/feedback` - Send feedback to help us improve AIDA.", inline=False)
     embed.add_field(name="Moderation", value="`/ban` - Ban a user from using AIDA.\n`/unban` - Unban a user from using AIDA.", inline=False)
     embed.add_field(name="Settings", value="`/settings` - Change your settings for AIDA.", inline=False)
+    embed.add_field(name="Chatbots", value="`/chatbot build` - Create your own AIDA!\n`/chatbot list` - List your AIDA modifications.\n`/chatbot delete` - Delete an AIDA modification.", inline=False)
     await ctx.respond(embed=embed)
 
 class WebSearchToggleButton(discord.ui.Button):
@@ -574,6 +575,7 @@ async def edit(ctx, id):
         color=discord.Color.red()
     )
 
-
+from keep_alive import keep_alive
+keep_alive()
 
 bot.run(DISCORD_TOKEN)
