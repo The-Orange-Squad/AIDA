@@ -1,4 +1,4 @@
-<div style="text-align: center">
+<div align="center" style="text-align: center">
 <h1>AIDA Discord Bot</h1>
 </div>
 
