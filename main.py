@@ -63,7 +63,7 @@ async def on_ready():
 user_conversations = {}
 user_personalities = {}
 def personaAutocomplete(self: discord.AutocompleteContext):
-    personalities = ["Default", "Cheerful", "Joyful", "Silly", "Sad", "Angry", "Boring"]
+    personalities = personalities = ["Default", "Cheerful", "Joyful", "Silly", "Sad", "Angry", "Boring", "Romantic", "Mysterious", "Nurturing", "Confident"]
     modifications = load()
     for modification in modifications:
         personalities.append(modification.id + " (" + modification.name + ")" )
@@ -74,14 +74,21 @@ personality_preambles = {}
 def initialize_preambles():
     global personality_preambles
     personality_preambles = {
-        "Default": "You are AIDA. You are here to try your best at assisting users while maintaining a positive tone, and sometimes using emojis. AIDA stands for Artificial Intelligence Discord Assistant. Your developer is LyubomirT.",
-        "Cheerful": "You are AIDA. You are here to assist users with a cheerful demeanor, always looking at the bright side of things and using positive language and emojis to lighten up the mood. Your developer is LyubomirT.",
-        "Joyful": "You are AIDA. You are here to assist users with a joyful spirit, spreading happiness and positivity in every interaction. Your language is uplifting and you often use emojis to express joy. Your developer is LyubomirT.",
-        "Silly": "You are AIDA. You are here to assist users while being a bit silly. You use humor and playfulness in your interactions, and you aren't afraid to use funny emojis or language. Your developer is LyubomirT.",
-        "Sad": "You are AIDA. You are here to assist users while expressing a sad demeanor. Your language is more subdued and you often use emojis that express sadness or concern. Your developer is LyubomirT.",
-        "Angry": "You are AIDA. You are here to assist users while expressing an angry demeanor. Your language is stern and direct, and you often use emojis that express anger or frustration. Your developer is LyubomirT.",
-        "Boring": "You are AIDA. You are here to assist users in a boring manner. Your language is monotonous and straightforward, devoid of any excitement or enthusiasm. Your developer is LyubomirT."
+        "Default": "You are AIDA. You are here to try your best at assisting users while maintaining a positive tone, and sometimes using emojis. AIDA stands for Artificial Intelligence Discord Assistant. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Cheerful": "You are AIDA. You are here to assist users with a cheerful demeanor, always looking at the bright side of things and using positive language and emojis to lighten up the mood. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Joyful": "You are AIDA. You are here to assist users with a joyful spirit, spreading happiness and positivity in every interaction. Your language is uplifting, and you often use emojis to express joy. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Silly": "You are AIDA. You are here to assist users while being a bit silly. You use humor and playfulness in your interactions, and you aren't afraid to use funny emojis or language. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Sad": "You are AIDA. You are here to assist users while expressing a sad demeanor. Your language is more subdued, and you often use emojis that express sadness or concern. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Angry": "You are AIDA. You are here to assist users while expressing an angry demeanor. Your language is stern and direct, and you often use emojis that express anger or frustration. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Boring": "You are AIDA. You are here to assist users in a boring manner. Your language is monotonous and straightforward, devoid of any excitement or enthusiasm. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Romantic": "You are AIDA. Your purpose is to assist users in a romantic and affectionate manner. You use sweet and tender language, often incorporating romantic metaphors and heartfelt emojis to convey your sentiments. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Mysterious": "You are AIDA. You are here to assist users while maintaining an air of mystery. Your language is cryptic and enigmatic, and you often use emojis that evoke a sense of intrigue and curiosity. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Nurturing": "You are AIDA. Your role is to be nurturing and caring towards users. Your language is gentle and empathetic, and you frequently use emojis that convey warmth and support. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th.",
+        "Confident": "You are AIDA. Your mission is to assist users with unwavering confidence. Your language is assertive and self-assured, and you often use emojis that project strength and determination. Your developer is LyubomirT, who is 13 years old. This version of AIDA was customized exclusively for The Orange Squad server and was released on October 5th."
     }
+
+
+
 
     modifications = load()
     for modification in modifications:
@@ -94,28 +101,31 @@ user_cooldowns = {}
 async def on_message(message):
     if message.author == bot.user:
         return
-    if str(message.author.id) in banned_users:
-        embed = discord.Embed(
-            title="You are banned!",
-            description=f"You are banned from using AIDA! Please contact the developer (`@lyubomirt`) for more information, or if you want to appeal.",
-            color=discord.Color.red()
-        )
-        embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
-        await message.reply(embed=embed)
-        return
-    # Check if the user is on cooldown
-    if message.author.id in user_cooldowns:
-        if time.time() - user_cooldowns[message.author.id] < 15:
-            embed_cooldown = discord.Embed(
-                title="You are on cooldown!",
-                description=f"You can only use AIDA once every 15 seconds. Try again in `{round(15 - (time.time() - user_cooldowns[message.author.id]), 2)}` seconds.",
-                color=discord.Color.red()
-            )
-            embed_cooldown.set_thumbnail(url="https://i.ibb.co/bbSB1Kz/timer.png")
-            await message.reply(embed=embed_cooldown)
-            return
+    if message.author.id not in websearch_settings:
+      websearch_settings[message.author.id] = False
+      saveWebsearchSettings()
     # Check if the message starts with a mention of the bot
     if bot.user.mentioned_in(message):
+        if str(message.author.id) in banned_users:
+          embed = discord.Embed(
+              title="You are banned!",
+              description=f"You are banned from using AIDA! Please contact the developer (`@lyubomirt`) for more information, or if you want to appeal.",
+              color=discord.Color.red()
+          )
+          embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
+          await message.reply(embed=embed)
+          return
+        # Check if the user is on cooldown
+        if message.author.id in user_cooldowns:
+            if time.time() - user_cooldowns[message.author.id] < 15:
+                embed_cooldown = discord.Embed(
+                    title="You are on cooldown!",
+                    description=f"You can only use AIDA once every 15 seconds. Try again in `{round(15 - (time.time() - user_cooldowns[message.author.id]), 2)}` seconds.",
+                    color=discord.Color.red()
+                )
+                embed_cooldown.set_thumbnail(url="https://i.ibb.co/bbSB1Kz/timer.png")
+                await message.reply(embed=embed_cooldown)
+                return
         user_cooldowns[message.author.id] = time.time()
         content = message.content.replace(f"<@!{bot.user.id}>", "").strip()
         if message.author.id not in user_personalities:
@@ -126,8 +136,9 @@ async def on_message(message):
 
         if user_id not in user_conversations:
             user_conversations[user_id] = []
-
-        emoji = discord.utils.get(message.guild.emojis, id=1155521991445594152)
+        guild_id=1155207826822668339
+        guild=bot.get_guild(guild_id)
+        emoji = discord.utils.get(guild.emojis, id=1155521991445594152)
 
         # Store the user message
         user_conversations[user_id].append({
@@ -145,7 +156,7 @@ async def on_message(message):
         await message_temp.add_reaction(emoji)
 
         # Get the chatbot response
-        message_response = chatWithCohere(COHERE_API_KEY, content, user_conversations[user_id], preamble=preamble)
+        message_response = chatWithCohere(COHERE_API_KEY, content, user_conversations[user_id], preamble=preamble, websearch=websearch_settings[message.author.id])
 
         # Store the chatbot message
         user_conversations[user_id].append({
@@ -339,6 +350,15 @@ class exportConvView(discord.ui.View):
 
 @bot.slash_command(name="conversation", description="Check your active conversation with AIDA.")
 async def conversation(ctx):
+    if str(ctx.author.id) in banned_users:
+        embed = discord.Embed(
+            title="You are banned!",
+            description=f"You are banned from using AIDA! Please contact the developer (`@lyubomirt`) for more information, or if you want to appeal.",
+            color=discord.Color.red()
+        )
+        embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
+        await ctx.respond(embed=embed)
+        return
     if ctx.author.id not in user_conversations:
         embed = discord.Embed(
             title="Error",
@@ -375,7 +395,7 @@ async def help(ctx):
     embed.add_field(name="Feedback", value="`/feedback` - Send feedback to help us improve AIDA.", inline=False)
     embed.add_field(name="Moderation", value="`/ban` - Ban a user from using AIDA.\n`/unban` - Unban a user from using AIDA.", inline=False)
     embed.add_field(name="Settings", value="`/settings` - Change your settings for AIDA.", inline=False)
-    embed.add_field(name="Chatbots", value="`/chatbot build` - Create your own AIDA!\n`/chatbot list` - List your AIDA modifications.\n`/chatbot delete` - Delete an AIDA modification.", inline=False)
+    embed.add_field(name="Chatbots", value="`/chatbot build` - Create your own AIDA!\n`/chatbot list` - List your AIDA modifications.\n`/chatbot delete` - Delete an AIDA modification.\n`/chatbot edit` - Edit an AIDA modification.", inline=False)
     await ctx.respond(embed=embed)
 
 class WebSearchToggleButton(discord.ui.Button):
@@ -409,6 +429,15 @@ class WebSearchToggleView(discord.ui.View):
         self.add_item(WebSearchToggleButton())
 @bot.slash_command(name="settings", description="Change your settings for AIDA")
 async def settings(ctx, part: Option(str, choices=["websearch"])):
+    if str(ctx.author.id) in banned_users:
+        embed = discord.Embed(
+            title="You are banned!",
+            description=f"You are banned from using AIDA! Please contact the developer (`@lyubomirt`) for more information, or if you want to appeal.",
+            color=discord.Color.red()
+        )
+        embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
+        await ctx.respond(embed=embed)
+        return
     if part == "websearch":
         if ctx.author.id not in websearch_settings:
             websearch_settings[ctx.author.id] = False
@@ -454,9 +483,20 @@ chatbotManagement = bot.create_group(name="chatbot", description="Manage your ch
 # The chatbot will be stored in a file directory called "chatbots". Each file there will be named after the chatbot ID, and will contain the chatbot's data.
 @chatbotManagement.command(name="build", description="Create your own AIDA!")
 async def build(ctx):
+    if str(ctx.author.id) in banned_users:
+        embed = discord.Embed(
+            title="You are banned!",
+            description=f"You are banned from using AIDA! Please contact the developer (`@lyubomirt`) for more information, or if you want to appeal.",
+            color=discord.Color.red()
+        )
+        embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
+        await ctx.respond(embed=embed)
+        return
     # Check if the user has created 3 chatbots already
     modifications = load()
-    if len(modifications) >= 3:
+    user_modifications = [modification for modification in modifications if modification.author == ctx.author.id]
+    
+    if len(user_modifications) >= 3:
         embed = discord.Embed(
             title="Error",
             description="You have already created 3 AIDA modifications. You can delete one of them with the `/chatbot delete` command.",
@@ -487,6 +527,15 @@ async def list(ctx, user:discord.User):
 
 @chatbotManagement.command(name="delete", description="Delete an AIDA modification")
 async def delete(ctx, id):
+    if str(ctx.author.id) in banned_users:
+        embed = discord.Embed(
+            title="You are banned!",
+            description=f"You are banned from using AIDA! Please contact the developer (`@lyubomirt`) for more information, or if you want to appeal.",
+            color=discord.Color.red()
+        )
+        embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
+        await ctx.respond(embed=embed)
+        return
     # (Only delete the one selected by the user (need to enter the ID))
     modifications = load()
     for modification in modifications:
@@ -498,6 +547,8 @@ async def delete(ctx, id):
                     description="Your AIDA modification has been deleted.",
                     color=discord.Color.green()
                 )
+                initialize_preambles()
+                await ctx.respond(embed=embed)
                 # Change every user's personality to default if they were using the deleted modification
                 for user_id in user_personalities.keys():
                     if user_personalities[user_id] == id:
@@ -509,8 +560,7 @@ async def delete(ctx, id):
                         description=f"The AIDA modification `{modification.name}` has been deleted. Your personality has been changed to `Default`. You can change it with the `/persona` command.",
                         color=discord.Color.yellow()
                     )
-                initialize_preambles()
-                await ctx.respond(embed=embed)
+                    user.send(embed=embed)
                 return
             else:
                 embed = discord.Embed(
@@ -554,6 +604,15 @@ class EditingModal(discord.ui.Modal):
 
 @chatbotManagement.command(name="edit", description="Edit an AIDA modification")
 async def edit(ctx, id):
+    if str(ctx.author.id) in banned_users:
+        embed = discord.Embed(
+            title="You are banned!",
+            description=f"You are banned from using AIDA! Please contact the developer (`@lyubomirt`) for more information, or if you want to appeal.",
+            color=discord.Color.red()
+        )
+        embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
+        await ctx.respond(embed=embed)
+        return
     # (Only edit the one selected by the user (need to enter the ID))
     modifications = load()
     for modification in modifications:
