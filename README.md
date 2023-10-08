@@ -25,6 +25,8 @@
   - [Sending Feedback](#sending-feedback)
   - [Web Search Settings](#web-search-settings)  <!-- Added this section -->
   - [AIDA Modifications](#aida-modifications)  <!-- Added this section -->
+  - [Chatting with an AIDA Modification](#chatting-with-an-aida-modification)  <!-- Added this section --
+  - [Image Generation](#image-generation)  <!-- Added this section -->
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -147,6 +149,18 @@ To chat with an AIDA modification, follow these steps:
 2. Select the ID of the AIDA modification you want to chat with.
 
 3. AIDA will respond to your message based on the configured personality and the content of your message.
+
+### Image Generation
+
+With this new feature, you can generate images using AIDA. Here's how:
+
+1. Type `/image imagine` in a text channel.
+
+2. Enter your image generation instructions in the command.
+
+3. AIDA will generate an image based on your instructions and send it to the channel.
+
+
 
 ## Contributing
 

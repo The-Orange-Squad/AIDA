@@ -398,6 +398,7 @@ async def help(ctx):
     embed.add_field(name="Moderation", value="`/ban` - Ban a user from using AIDA.\n`/unban` - Unban a user from using AIDA.", inline=False)
     embed.add_field(name="Settings", value="`/settings` - Change your settings for AIDA.", inline=False)
     embed.add_field(name="Chatbots", value="`/chatbot build` - Create your own AIDA!\n`/chatbot list` - List your AIDA modifications.\n`/chatbot delete` - Delete an AIDA modification.\n`/chatbot edit` - Edit an AIDA modification.", inline=False)
+    embed.add_field(name="Image Generation", value="`image imagine` - Generate an image with Stable Diffusion v2.1 or Stable Diffusion v1.5.", inline=False)
     await ctx.respond(embed=embed)
 
 class WebSearchToggleButton(discord.ui.Button):
