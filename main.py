@@ -9,6 +9,8 @@ import asyncio
 import json
 import time
 from chatbot_manager import AIDA_Modification, load
+from image_gen.stable_diff_21 import prototype1_imagegen
+import shutil
 
 load_dotenv()
 
@@ -636,5 +638,67 @@ async def edit(ctx, id):
 
 from keep_alive import keep_alive
 keep_alive()
+
+
+image_g = bot.create_group(name="image", description="Generate images with AIDA")
+
+@image_g.command(name="imagine", description="There are endless possibilities...")
+async def imagine(ctx, text: str, model: Option(str, description="The Model to Use", choices=["Stable Diffusion v1.5", "Stable Diffusion v2.1"]), steps: Option(int, description="The number of steps to take", choices=[2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]) = 40, scfg: Option(float, description="Scale of classifier-free guidance", choices=[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9]) = 7.5): # Steps: Up to 50
+    if str(ctx.author.id) in banned_users:
+        embed = discord.Embed(
+            title="You are banned!",
+            description=f"You are banned from using AIDA! Please contact the developer (`@lyubomirt`) for more information, or if you want to appeal.",
+            color=discord.Color.red()
+        )
+        embed.set_thumbnail(url="https://i.ibb.co/471xQmT/ban-user.png")
+        await ctx.respond(embed=embed)
+        return
+    if len(text) > 500:
+        embed = discord.Embed(
+            title="Error",
+            description="The text must be less than 500 characters.",
+            color=discord.Color.red()
+        )
+        await ctx.respond(embed=embed)
+        return
+    embed = discord.Embed(
+        title="Generating...",
+        description="Your image is being generated...",
+        color=discord.Color.blue()
+    )
+    message_temp = await ctx.channel.send(embed=embed)
+    await ctx.defer()
+    guild = bot.get_guild(1155207826822668339)
+    emoji = discord.utils.get(guild.emojis, id=1155521991445594152)
+    await message_temp.add_reaction(emoji)
+
+    image = prototype1_imagegen(text, model=model, sampling_step=steps, scfg=scfg)
+
+    # Get the image path (the first one from the tuple returned by the function)
+    image = image[0]
+
+
+    # Send the image
+    embed.title = "Here is your image!"
+    embed.description = "The image has been generated."
+    # Set the embed image to the image path
+    file = discord.File(image)
+    # Get the first channel in the guild
+    channel = guild.text_channels[0]
+    message = await channel.send(file=file)
+    # Get the url of the file
+    url = message.attachments[0].url
+    embed.set_image(url=url)
+    await message_temp.delete()
+
+    # Remove `/tmp/gradio` directory
+    shutil.rmtree("/tmp/gradio")
+    
+    
+    await ctx.respond(embed=embed)
+
+
+
+
 
 bot.run(DISCORD_TOKEN)
