@@ -11,8 +11,12 @@ import time
 from chatbot_manager import AIDA_Modification, load
 from image_gen.stable_diff_21 import prototype1_imagegen
 import shutil
+from image_gen.dreamshaper import query_dreamshaper
+import io
+from PIL import Image
+import random
 
-load_dotenv()
+load_dotenv("test.env")
 
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -144,7 +148,8 @@ async def on_message(message):
 
         # Store the user message
         user_conversations[user_id].append({
-            "user_name": "User",
+            "role": "USER",
+            "user_name": message.author.name,
             "message": content
         })
 
@@ -162,7 +167,7 @@ async def on_message(message):
 
         # Store the chatbot message
         user_conversations[user_id].append({
-            "user_name": "Chatbot",
+            "role": "CHATBOT",
             "message": message_response
         })
 
@@ -637,14 +642,11 @@ async def edit(ctx, id):
         color=discord.Color.red()
     )
 
-from keep_alive import keep_alive
-keep_alive()
-
 
 image_g = bot.create_group(name="image", description="Generate images with AIDA")
 
 @image_g.command(name="imagine", description="There are endless possibilities...")
-async def imagine(ctx, text: str, model: Option(str, description="The Model to Use", choices=["Stable Diffusion v1.5", "Stable Diffusion v2.1"]), steps: Option(int, description="The number of steps to take", choices=[2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]) = 40, scfg: Option(float, description="Scale of classifier-free guidance", choices=[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9]) = 7.5): # Steps: Up to 50
+async def imagine(ctx, text: str, model: Option(str, description="The Model to Use", choices=["Stable Diffusion v1.5", "Stable Diffusion v2.1", "Dreamshaper"]), steps: Option(int, description="The number of steps to take", choices=[2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]) = 40, scfg: Option(float, description="Scale of classifier-free guidance", choices=[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9]) = 7.5): # Steps: Up to 50
     if str(ctx.author.id) in banned_users:
         embed = discord.Embed(
             title="You are banned!",
@@ -673,7 +675,20 @@ async def imagine(ctx, text: str, model: Option(str, description="The Model to U
     emoji = discord.utils.get(guild.emojis, id=1155521991445594152)
     await message_temp.add_reaction(emoji)
 
-    image = prototype1_imagegen(text, model=model, sampling_step=steps, scfg=scfg)
+    if model == "Stable Diffusion v1.5":
+        image = await prototype1_imagegen(text, model=model, sampling_step=steps)
+    elif model == "Stable Diffusion v2.1":
+        image = await prototype1_imagegen(text, model=model, sampling_step=steps)
+    elif model == "Dreamshaper":
+        image_bytes = await query_dreamshaper({
+            "inputs": text,
+        })
+        # You can access the image with PIL.Image for example
+        image = Image.open(io.BytesIO(image_bytes))
+        # Save the image to a file
+        image.save("dreamshaper.png")
+        # Get the path of the saved image and put that into a list
+        image = ["dreamshaper.png"]
 
     # Get the image path (the first one from the tuple returned by the function)
     image = image[0]
@@ -693,10 +708,16 @@ async def imagine(ctx, text: str, model: Option(str, description="The Model to U
     await message_temp.delete()
 
     # Remove `/tmp/gradio` directory
-    shutil.rmtree("/tmp/gradio")
+    if os.path.isdir("/tmp/gradio"):
+        shutil.rmtree("/tmp/gradio")
+    
+    if model == "Dreamshaper":
+        os.remove("dreamshaper.png")
     
     
     await ctx.respond(embed=embed)
+
+
 
 
 
