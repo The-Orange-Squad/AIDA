@@ -160,6 +160,12 @@ With this new feature, you can generate images using AIDA. Here's how:
 
 3. AIDA will generate an image based on your instructions and send it to the channel.
 
+AIDA currently supports the following models for image generation:
+
+- `Stable Diffusion v1.5 (Base)`: The basic Stable Diffusion model, with a high detail, but a low quality.
+- `Stable Diffusion v2.1 (Base)`: The improved basic Stable Diffusion model, with a high detail and a higher quality.
+- `Dreamshaper v8`: The Dreamshaper model from HuggingFace, with a high detail and a high quality. Based on the Stable Diffusion model and improved a lot by the community.
+
 
 
 ## Contributing
