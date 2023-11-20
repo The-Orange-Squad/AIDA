@@ -12,6 +12,7 @@ from chatbot_manager import AIDA_Modification, load
 from image_gen.stable_diff_21 import prototype1_imagegen
 import shutil
 from image_gen.dreamshaper import query_dreamshaper
+from image_gen.jug import query_jug
 import io
 from PIL import Image
 import random
@@ -646,7 +647,7 @@ async def edit(ctx, id):
 image_g = bot.create_group(name="image", description="Generate images with AIDA")
 
 @image_g.command(name="imagine", description="There are endless possibilities...")
-async def imagine(ctx, text: str, model: Option(str, description="The Model to Use", choices=["Stable Diffusion v1.5", "Stable Diffusion v2.1", "Dreamshaper"]), steps: Option(int, description="The number of steps to take", choices=[2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]) = 40, scfg: Option(float, description="Scale of classifier-free guidance", choices=[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9]) = 7.5): # Steps: Up to 50
+async def imagine(ctx, text: str, model: Option(str, description="The Model to Use", choices=["Stable Diffusion v1.5", "Stable Diffusion v2.1", "Dreamshaper", "DALL-E 3 (ish)"]), steps: Option(int, description="The number of steps to take", choices=[2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50]) = 40, scfg: Option(float, description="Scale of classifier-free guidance", choices=[1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9]) = 7.5): # Steps: Up to 50
     if str(ctx.author.id) in banned_users:
         embed = discord.Embed(
             title="You are banned!",
@@ -675,21 +676,35 @@ async def imagine(ctx, text: str, model: Option(str, description="The Model to U
     emoji = discord.utils.get(guild.emojis, id=1155521991445594152)
     await message_temp.add_reaction(emoji)
 
+    image = None
+
     if model == "Stable Diffusion v1.5":
         image = await prototype1_imagegen(text, model=model, sampling_step=steps)
     elif model == "Stable Diffusion v2.1":
         image = await prototype1_imagegen(text, model=model, sampling_step=steps)
-    elif model == "Dreamshaper":
-        image_bytes = await query_dreamshaper({
-            "inputs": text,
-        })
-        # You can access the image with PIL.Image for example
-        image = Image.open(io.BytesIO(image_bytes))
-        # Save the image to a file
-        image.save("dreamshaper.png")
-        # Get the path of the saved image and put that into a list
-        image = ["dreamshaper.png"]
+    elif model == "Dreamshaper" or model == "DALL-E 3 (ish)":
+        async def doesitworkornot():
+            global image
+            if model == "Dreamshaper":
+                image_bytes = await query_dreamshaper({
+                    "inputs": text,
+                })
+            elif model == "DALL-E 3 (ish)":
+                image_bytes = await query_jug({
+                    "inputs": text,
+                })
+            # You can access the image with PIL.Image for example
+            try:
+                image = Image.open(io.BytesIO(image_bytes))
+            except:
+                await doesitworkornot()
+                return
+            # Save the image to a file
+            image.save("dreamshaper.png")
+        await doesitworkornot()
 
+    # Get the path of the saved image and put that into a list
+    image = ["dreamshaper.png"]
     # Get the image path (the first one from the tuple returned by the function)
     image = image[0]
 
@@ -711,7 +726,7 @@ async def imagine(ctx, text: str, model: Option(str, description="The Model to U
     if os.path.isdir("/tmp/gradio"):
         shutil.rmtree("/tmp/gradio")
     
-    if model == "Dreamshaper":
+    if model == "Dreamshaper" or model == "DALL-E 3 (ish)":
         os.remove("dreamshaper.png")
     
     
